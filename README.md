@@ -18,9 +18,8 @@ A lightweight, **design system agnostic** React form library built as a powerful
 
 ## Installation
 
-```bash
-npm install suprform react-hook-form react react-dom
-```
+````bash
+npm install suprform
 
 ## Quick Start with SuprForm.Control
 
@@ -65,7 +64,7 @@ function LoginForm() {
     </SuprForm>
   );
 }
-```
+````
 
 **That's it!** `SuprForm.Control` automatically:
 
