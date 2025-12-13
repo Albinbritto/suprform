@@ -58,6 +58,9 @@ const FormControl = <
   children,
   name,
   rules,
+  className,
+  label,
+  id,
 }: FormControlProps<TFieldValues, TName>) => {
   const { control } = useFormContext<TFieldValues>();
 
@@ -66,7 +69,15 @@ const FormControl = <
       control={control}
       name={name}
       rules={rules}
-      render={(props) => <ControlledField<TFieldValues, TName> {...props} children={children} />}
+      render={(props) => (
+        <ControlledField<TFieldValues, TName>
+          {...props}
+          children={children}
+          className={className}
+          label={label}
+          id={id}
+        />
+      )}
     />
   );
 };
@@ -78,6 +89,9 @@ const ControlledField = <
   field,
   fieldState,
   children,
+  className = '',
+  label,
+  id = crypto.randomUUID(),
 }: ControlledFieldProps<TFieldValues, TName>) => {
   const { onChange, onBlur, value, name, disabled } = field;
   const { error } = fieldState;
@@ -101,15 +115,32 @@ const ControlledField = <
     [onBlur, originalOnBlur]
   );
 
-  return cloneElement(children, {
-    ...children.props,
-    name,
-    disabled,
-    onChange: handleChange,
-    value: value || children.props.value,
-    onBlur: handleBlur,
-    error,
-  });
+  return (
+    <div
+      className={`controlled-field ${className}`}
+      style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
+    >
+      {label && (
+        <label htmlFor={id} className='controlled-field-label'>
+          {label}
+        </label>
+      )}
+      {cloneElement(children, {
+        ...children.props,
+        id,
+        name,
+        disabled,
+        onChange: handleChange,
+        value: value || children.props.value,
+        onBlur: handleBlur,
+      })}
+      {error && (
+        <div style={{ color: 'red', fontSize: 13 }} className='controlled-field-error'>
+          {error.message}
+        </div>
+      )}
+    </div>
+  );
 };
 
 SuprForm.Control = FormControl;

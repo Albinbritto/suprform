@@ -25,6 +25,8 @@ export interface FormControlProps<
   rules?: RegisterOptions<TFieldValues, TName>;
   name: TName;
   label?: string;
+  className?: string;
+  id?: string;
 }
 
 export interface ControlledFieldProps<
@@ -34,4 +36,7 @@ export interface ControlledFieldProps<
   field: ControllerRenderProps<TFieldValues, TName>;
   fieldState: ControllerFieldState;
   children: ReactElement<any>;
+  className?: string;
+  label?: string;
+  id?: string;
 }

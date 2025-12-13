@@ -1,6 +1,6 @@
 {
   "name": "suprform",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A headless React form library for managing complex state, validation, and error handling",
   "type": "module",
   "main": "./dist/suprform.cjs.js",
@@ -13,6 +13,15 @@
       "require": "./dist/suprform.cjs.js"
     }
   },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Albinbritto/suprform.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Albinbritto/suprform/issues"
+  },
+  "homepage": "https://github.com/Albinbritto/suprform#readme",
   "files": [
     "dist"
   ],
@@ -36,7 +45,11 @@
     "hooks",
     "state-management"
   ],
-  "author": "",
+  "author": "Albin Britto",
+  "engines": {
+    "node": ">=18",
+    "npm": ">=9"
+  },
   "license": "MIT",
   "devDependencies": {
     "@storybook/addon-essentials": "^8.6.14",

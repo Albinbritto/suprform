@@ -1,1 +1,1 @@
-export * from './SuprForm';
+export { default as SuprForm } from './SuprForm';
