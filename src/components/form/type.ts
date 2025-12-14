@@ -7,6 +7,7 @@ import {
   RegisterOptions,
   SubmitHandler,
   UseFormProps,
+  SubmitErrorHandler,
 } from 'react-hook-form';
 
 export interface SuprFormProps<TFieldValues extends FieldValues = FieldValues> {
@@ -15,6 +16,9 @@ export interface SuprFormProps<TFieldValues extends FieldValues = FieldValues> {
   style?: React.CSSProperties;
   className?: string;
   formOptions?: UseFormProps<TFieldValues>;
+  onError?: SubmitErrorHandler<TFieldValues>;
+  showAsterisk?: boolean;
+  ref?: React.Ref<any>;
 }
 
 export interface FormControlProps<
@@ -27,6 +31,8 @@ export interface FormControlProps<
   label?: string;
   className?: string;
   id?: string;
+  shouldUnregister?: boolean;
+  disabled?: boolean;
 }
 
 export interface ControlledFieldProps<
@@ -39,4 +45,5 @@ export interface ControlledFieldProps<
   className?: string;
   label?: string;
   id?: string;
+  required?: boolean;
 }

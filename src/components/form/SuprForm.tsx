@@ -1,4 +1,4 @@
-import { cloneElement, useCallback } from 'react';
+import { useImperativeHandle } from 'react';
 import type { ReactElement } from 'react';
 import {
   Controller,
@@ -8,7 +8,9 @@ import {
   FieldValues,
   FieldPath,
 } from 'react-hook-form';
-import { SuprFormProps, FormControlProps, ControlledFieldProps } from './type';
+import { SuprFormProps, FormControlProps } from './type';
+import { SuprFormProvider } from '../../context/SuprFormContext';
+import { ControlledField } from '../controlled-field/ControlledField';
 
 type SuprFormBase = <TFieldValues extends FieldValues = FieldValues>(
   props: SuprFormProps<TFieldValues>
@@ -26,9 +28,12 @@ type SuprFormComponent = SuprFormBase & {
 const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldValues>({
   children,
   onSubmit = () => {},
+  onError = () => {},
   style = {},
   className = '',
   formOptions,
+  showAsterisk,
+  ref,
 }: SuprFormProps<TFieldValues>) => {
   const methods = useForm<TFieldValues>({
     mode: 'onSubmit',
@@ -37,17 +42,38 @@ const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldVal
     ...formOptions,
   });
 
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        setValue: methods.setValue,
+        setError: methods.setError,
+        clearErrors: methods.clearErrors,
+        getValues: methods.getValues,
+        reset: methods.reset,
+        setFocus: methods.setFocus,
+        resetField: methods.resetField,
+        trigger: methods.trigger,
+        unregister: methods.unregister,
+        watch: methods.watch,
+      };
+    },
+    [methods]
+  );
+
   return (
-    <FormProvider {...methods}>
-      <form
-        noValidate
-        onSubmit={methods.handleSubmit(onSubmit)}
-        style={style}
-        className={className}
-      >
-        {children}
-      </form>
-    </FormProvider>
+    <SuprFormProvider showAsterisk={showAsterisk}>
+      <FormProvider {...methods}>
+        <form
+          noValidate
+          onSubmit={methods.handleSubmit(onSubmit, onError)}
+          style={style}
+          className={className}
+        >
+          {children}
+        </form>
+      </FormProvider>
+    </SuprFormProvider>
   );
 };
 
@@ -61,14 +87,19 @@ const FormControl = <
   className,
   label,
   id,
+  disabled,
+  shouldUnregister,
 }: FormControlProps<TFieldValues, TName>) => {
   const { control } = useFormContext<TFieldValues>();
-
+  const controlledValue = children.props.value;
   return (
     <Controller
       control={control}
       name={name}
       rules={rules}
+      defaultValue={controlledValue}
+      disabled={disabled}
+      shouldUnregister={shouldUnregister}
       render={(props) => (
         <ControlledField<TFieldValues, TName>
           {...props}
@@ -76,70 +107,10 @@ const FormControl = <
           className={className}
           label={label}
           id={id}
+          required={!!rules}
         />
       )}
     />
-  );
-};
-
-const ControlledField = <
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
->({
-  field,
-  fieldState,
-  children,
-  className = '',
-  label,
-  id = crypto.randomUUID(),
-}: ControlledFieldProps<TFieldValues, TName>) => {
-  const { onChange, onBlur, value, name, disabled } = field;
-  const { error } = fieldState;
-
-  const originalOnChange = children.props.onChange;
-  const originalOnBlur = children.props.onBlur;
-
-  const handleChange = useCallback(
-    (...args: any[]) => {
-      onChange(...args);
-      originalOnChange?.(...args);
-    },
-    [onChange, originalOnChange]
-  );
-
-  const handleBlur = useCallback(
-    (...args: any[]) => {
-      onBlur();
-      originalOnBlur?.(...args);
-    },
-    [onBlur, originalOnBlur]
-  );
-
-  return (
-    <div
-      className={`controlled-field ${className}`}
-      style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
-    >
-      {label && (
-        <label htmlFor={id} className='controlled-field-label'>
-          {label}
-        </label>
-      )}
-      {cloneElement(children, {
-        ...children.props,
-        id,
-        name,
-        disabled,
-        onChange: handleChange,
-        value: value || children.props.value,
-        onBlur: handleBlur,
-      })}
-      {error && (
-        <div style={{ color: 'red', fontSize: 13 }} className='controlled-field-error'>
-          {error.message}
-        </div>
-      )}
-    </div>
   );
 };
 
