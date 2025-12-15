@@ -1,29 +1,131 @@
-# suprform
+# SuprForm
 
-A lightweight, **design system agnostic** React form library built as a powerful wrapper on top of **[react-hook-form](https://react-hook-form.com)**. Manage complex forms, validation, and error handling with a clean, composable API—no UI components bundled, complete control over your design.
+A **headless React form library** that wraps [react-hook-form](https://react-hook-form.com) with a composable API for effortless form management. Design system agnostic, TypeScript-first, and built for developer experience.
 
-> **What is SuprForm?** A thin, type-safe layer on top of `react-hook-form` that adds intuitive field management, built-in validation rules, and automatic error display—while staying completely design-system agnostic.
+## Core Features
 
-## Key Highlights
+### 🎨 **Design System Agnostic**
 
-- 🎨 **Design System Agnostic** - Works with any UI framework (Material-UI, Tailwind, custom components, etc.) or plain HTML
-- 🪝 **Built on react-hook-form** - Leverages the performance and flexibility of the most popular form library
-- 🔒 **TypeScript First** - Full type safety and IntelliSense support with complete type inference
-- ✅ **Seamless Validation** - Declarative validation rules with built-in validators and custom rule support
-- 🎯 **Field-Level Control** - Granular control over individual fields with automatic state tracking
-- 📊 **Automatic State Management** - Tracks dirty, touched, valid, error, and submission states
-- ⚡ **Async Validation** - Native support for asynchronous validation (API calls, etc.)
-- 🧪 **Well Tested** - Comprehensive test suite with full coverage
-- 📦 **Minimal Footprint** - Only requires React as a peer dependency
+Use with any UI framework—Material-UI, Ant Design, Tailwind, shadcn/ui, or plain HTML. SuprForm provides the logic, you control the design.
 
-## Installation
+```tsx
+// Works with Material-UI
+<SuprForm.Control name="email" rules={{ required: true }}>
+  <TextField variant="outlined" />
+</SuprForm.Control>
 
-````bash
+// Works with plain HTML
+<SuprForm.Control name="email" rules={{ required: true }}>
+  <input type="email" />
+</SuprForm.Control>
+```
+
+### 🎯 **Composable Field Control**
+
+The `SuprForm.Control` component wraps your inputs with automatic label rendering, error display, and validation—no configuration needed.
+
+- Automatic label and error rendering
+- Field state tracking (touched, dirty, valid)
+- Seamless integration with any input component
+- Full TypeScript inference for field names and values
+
+### 🔒 **TypeScript-First Architecture**
+
+Complete type safety with intelligent inference throughout your forms. Field names, validation rules, and form values are all fully typed.
+
+```tsx
+interface FormData {
+  email: string;
+  age: number;
+}
+
+<SuprForm<FormData>
+  onSubmit={(values) => {
+    // values is typed as FormData
+    console.log(values.email); // ✓ Type-safe
+  }}
+>
+  <SuprForm.Control name='email' /> {/* ✓ Type-checked */}
+</SuprForm>;
+```
+
+### 👁️ **Conditional Field Visibility**
+
+Advanced conditional rendering with declarative visibility rules. Show/hide fields based on other field values with AND/OR logic.
+
+```tsx
+<SuprForm.Control
+  name='creditCard'
+  visibility={{
+    operator: 'AND',
+    conditions: [
+      { name: 'paymentMethod', operator: 'EQUALS', value: 'card' },
+      { name: 'amount', operator: 'GREATER_THAN', value: 0 },
+    ],
+  }}
+>
+  <input />
+</SuprForm.Control>
+```
+
+**Supported operators:** EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN, STARTS_WITH, ENDS_WITH, INCLUDES
+
+### ✅ **Declarative Validation**
+
+Powered by react-hook-form's validation system with support for sync and async validators.
+
+```tsx
+<SuprForm.Control
+  name='username'
+  rules={{
+    required: 'Username is required',
+    minLength: { value: 3, message: 'Min 3 characters' },
+    validate: async (value) => {
+      const available = await checkAvailability(value);
+      return available || 'Username taken';
+    },
+  }}
+>
+  <input />
+</SuprForm.Control>
+```
+
+### 🎛️ **Imperative Form Control**
+
+Access react-hook-form methods via ref for programmatic form manipulation.
+
+```tsx
+const formRef = useRef();
+
+<SuprForm ref={formRef} onSubmit={handleSubmit}>
+  {/* ... */}
+</SuprForm>;
+
+// Later:
+formRef.current.setValue('email', 'test@example.com');
+formRef.current.trigger('email'); // Manually validate
+formRef.current.reset(); // Reset form
+```
+
+**Available methods:** `setValue`, `setError`, `clearErrors`, `getValues`, `reset`, `setFocus`, `resetField`, `trigger`, `unregister`, `watch`
+
+### 📦 **Zero UI Dependencies**
+
+Only React as a peer dependency. No CSS framework lock-in, no component library coupling. Bring your own design system.
+
+---
+
+## Quick Start
+
+### Installation
+
+```bash
 npm install suprform
+```
 
-## Quick Start with SuprForm.Control
+### Basic Example
 
-The easiest way to get started—use the composable `SuprForm.Control` component with your own UI components:
+The composable `SuprForm.Control` component handles everything for you:
 
 ```tsx
 import SuprForm from 'suprform';
@@ -64,20 +166,21 @@ function LoginForm() {
     </SuprForm>
   );
 }
-````
+```
 
-**That's it!** `SuprForm.Control` automatically:
+SuprForm.Control **automatically handles**:
 
-- Renders a label above the input
-- Validates on blur and change
-- Displays error messages below the input
-- Manages field state (touched, dirty, value, etc.)
+- Label rendering with proper `htmlFor` linking
+- Validation on blur and change
+- Error message display
+- Field state management (value, touched, dirty, error)
+- Works with any input component (HTML, Material-UI, custom, etc.)
 
-Works with any input component—plain HTML, styled divs, Material-UI inputs, custom components, etc.
+---
 
-## Advanced Example: Custom UI Components
+## Advanced Usage
 
-Since SuprForm is **design system agnostic**, use it with your favorite component library:
+### With UI Component Libraries
 
 ```tsx
 import SuprForm from 'suprform';
@@ -127,232 +230,265 @@ function SignupForm() {
 }
 ```
 
-## Styling
+### Conditional Field Visibility
 
-Since SuprForm is **design system agnostic**, styling is completely in your control. Here are the CSS classes generated:
+Show/hide fields based on other field values:
 
-```css
-/* Wrapper for the entire field */
-.controlled-field {
-  /* Your styles */
-}
+```tsx
+<SuprForm onSubmit={handleSubmit}>
+  <SuprForm.Control name='hasDiscount' label='Apply Discount?'>
+    <input type='checkbox' />
+  </SuprForm.Control>
 
-/* Label element */
-.controlled-field-label {
-  /* Your styles */
-}
-
-/* Error message container */
-.controlled-field-error {
-  /* Defaults to red, 14px font, margin-top 4px */
-  /* Override with your own styles */
-}
+  {/* Only show when hasDiscount is checked */}
+  <SuprForm.Control
+    name='discountCode'
+    label='Discount Code'
+    visibility={{
+      operator: 'AND',
+      conditions: [{ name: 'hasDiscount', operator: 'EQUALS', value: true }],
+    }}
+    rules={{ required: 'Discount code required' }}
+  >
+    <input type='text' />
+  </SuprForm.Control>
+</SuprForm>
 ```
 
-**Example with Tailwind CSS:**
+### Async Validation
 
 ```tsx
 <SuprForm.Control
-  name='email'
-  label='Email'
-  rules={{ required: 'Email is required' }}
-  className='mb-4'
+  name='username'
+  rules={{
+    required: 'Username is required',
+    validate: async (value) => {
+      const response = await fetch(`/api/check-username/${value}`);
+      const data = await response.json();
+      return data.available || 'Username already taken';
+    },
+  }}
 >
-  <input
-    type='email'
-    className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2'
-  />
+  <input />
 </SuprForm.Control>
 ```
 
-**Example with styled-components:**
+### Programmatic Form Control
 
 ```tsx
-import styled from 'styled-components';
+function MyForm() {
+  const formRef = useRef();
 
-const StyledField = styled.div`
-  margin-bottom: 1.5rem;
+  const prefillForm = () => {
+    formRef.current.setValue('email', 'user@example.com');
+    formRef.current.setFocus('password');
+  };
 
-  label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-
-    &:focus {
-      outline: none;
-      border-color: #0066cc;
-      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-    }
-  }
-
-  .controlled-field-error {
-    color: #d32f2f;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-  }
-`;
-
-function EmailField() {
   return (
-    <SuprForm.Control
-      name='email'
-      label='Email'
-      rules={{ required: 'Email is required' }}
-      className={StyledField}
-    >
-      <input type='email' />
-    </SuprForm.Control>
+    <>
+      <button onClick={prefillForm}>Prefill</button>
+      <SuprForm ref={formRef} onSubmit={handleSubmit}>
+        <SuprForm.Control name='email'>
+          <input />
+        </SuprForm.Control>
+        <SuprForm.Control name='password'>
+          <input type='password' />
+        </SuprForm.Control>
+      </SuprForm>
+    </>
   );
 }
 ```
 
-## Publishing
-
-To publish a new version to npm:
-
-1. Ensure you are logged in to npm:
-
-```bash
-npm login
-```
-
-2. Build the package (runs automatically via `prepublishOnly`):
-
-```bash
-npm run build
-```
-
-3. Bump the version and publish:
-
-```bash
-npm version patch   # or minor/major
-npm publish --access public --otp=XXXXXX
-```
-
-(Replace `XXXXXX` with your 2FA code if you have 2FA enabled.)
-
-The published package contains only the compiled `dist/` files with ESM/CJS builds and TypeScript declarations.
-
-## Validation Rules
-
-All validation rules come from **react-hook-form**. Pass them directly to the `rules` prop:
-
-```tsx
-<SuprForm.Control
-  name='age'
-  rules={{
-    required: 'Age is required',
-    min: { value: 18, message: 'Must be 18 or older' },
-    max: { value: 120, message: 'Please enter a valid age' },
-  }}
->
-  <input type='number' />
-</SuprForm.Control>
-```
-
-### Common Rules
-
-- `required` / `required: "message"` - Field must not be empty
-- `minLength: { value: 5, message: "..." }` - Minimum string length
-- `maxLength: { value: 20, message: "..." }` - Maximum string length
-- `min: { value: 0, message: "..." }` - Minimum numeric value
-- `max: { value: 100, message: "..." }` - Maximum numeric value
-- `pattern: { value: /regex/, message: "..." }` - Match a regex pattern
-- `validate: (value) => true || "error message"` - Custom synchronous validation
-- `validate: async (value) => true || "error message"` - Custom async validation
-
-### Custom Validation Example
-
-```tsx
-<SuprForm.Control
-  name='password'
-  rules={{
-    required: 'Password is required',
-    minLength: { value: 8, message: 'Must be at least 8 characters' },
-    validate: async (value) => {
-      const isCommon = await checkIfPasswordIsCommon(value);
-      return !isCommon || 'This password is too common';
-    },
-  }}
->
-  <input type='password' />
-</SuprForm.Control>
-```
+---
 
 ## API Reference
 
-### SuprForm Component
+### `<SuprForm>`
 
-The root form wrapper (powered by `FormProvider` from react-hook-form).
+Root form component that wraps your form fields.
 
 **Props:**
 
-- `children` - Form fields and elements
-- `onSubmit` - Handler called with form values when form is valid
-- `className` - CSS class for the `<form>` element
-- `style` - Inline styles for the `<form>` element
-- `formOptions` - Options passed to react-hook-form's `useForm()` hook
+| Prop           | Type                  | Description                                  |
+| -------------- | --------------------- | -------------------------------------------- |
+| `children`     | `ReactNode`           | Form fields and elements                     |
+| `onSubmit`     | `(values: T) => void` | Called with form values when valid           |
+| `onError`      | `(errors) => void`    | Called when form submission fails validation |
+| `formOptions`  | `UseFormProps`        | Options for react-hook-form's `useForm()`    |
+| `className`    | `string`              | CSS class for `<form>` element               |
+| `style`        | `CSSProperties`       | Inline styles for `<form>`                   |
+| `showAsterisk` | `boolean`             | Show asterisk on required field labels       |
+| `ref`          | `Ref`                 | Access form methods imperatively             |
 
 **Example:**
 
 ```tsx
-<SuprForm
-  onSubmit={(values) => console.log(values)}
-  formOptions={{
-    mode: 'onBlur', // Validate on blur instead of on change
-    reValidateMode: 'onChange',
-  }}
->
-  {/* controls */}
+<SuprForm onSubmit={(values) => console.log(values)} formOptions={{ mode: 'onBlur' }} showAsterisk>
+  {/* fields */}
 </SuprForm>
 ```
 
-### SuprForm.Control Component
+### `<SuprForm.Control>`
 
-Composable field control component that wraps your input elements.
+Composable field wrapper that handles labels, errors, and validation.
 
 **Props:**
 
-- `name` - Field name (must match form values)
-- `label` - Optional label text (rendered above input with `htmlFor` linking)
-- `children` - Your input component (any React element)
-- `rules` - Validation rules (react-hook-form's `RegisterOptions`)
-- `className` - CSS class for the wrapper div
+| Prop               | Type                    | Description                                                 |
+| ------------------ | ----------------------- | ----------------------------------------------------------- |
+| `name`             | `string`                | **Required.** Field name (type-checked against form values) |
+| `children`         | `ReactElement`          | **Required.** Your input component                          |
+| `rules`            | `RegisterOptions`       | Validation rules (react-hook-form format)                   |
+| `label`            | `string`                | Label text (rendered above input)                           |
+| `className`        | `string`                | CSS class for wrapper div                                   |
+| `id`               | `string`                | HTML id (auto-generated if not provided)                    |
+| `disabled`         | `boolean`               | Disable the field                                           |
+| `visibility`       | `Visibility \| boolean` | Conditional visibility rules                                |
+| `shouldUnregister` | `boolean`               | Unregister field when unmounted                             |
 
 **Example:**
 
 ```tsx
 <SuprForm.Control
   name='email'
-  label='Email'
-  rules={{ required: 'Email is required' }}
-  className='form-field'
+  label='Email Address'
+  rules={{
+    required: 'Email is required',
+    pattern: { value: /^\S+@\S+$/, message: 'Invalid email' },
+  }}
+  className='mb-4'
 >
   <input type='email' />
 </SuprForm.Control>
 ```
 
-**Automatic Features:**
+### Validation Rules
 
-- Renders `<label>` when `label` prop is provided
-- Displays error message below input (in red, styled as `.controlled-field-error`)
-- Injects `name`, `value`, `onChange`, `onBlur`, and `error` props to child input
-- Handles field state automatically (touched, dirty, valid)
-- `defaultValue` - Default field value
-- `validators` - Array of validators
+SuprForm uses [react-hook-form validation rules](https://react-hook-form.com/docs/useform/register#options):
 
-**Returns:**
+| Rule        | Type                                      | Description                |
+| ----------- | ----------------------------------------- | -------------------------- |
+| `required`  | `string \| boolean`                       | Field is required          |
+| `min`       | `{ value: number, message: string }`      | Minimum numeric value      |
+| `max`       | `{ value: number, message: string }`      | Maximum numeric value      |
+| `minLength` | `{ value: number, message: string }`      | Minimum string length      |
+| `maxLength` | `{ value: number, message: string }`      | Maximum string length      |
+| `pattern`   | `{ value: RegExp, message: string }`      | Regex pattern match        |
+| `validate`  | `(value) => boolean \| string \| Promise` | Custom validation function |
 
-- `field` - Field props (value, onChange, onBlur, onFocus)
-- `meta` - Field metadata (error, touched, dirty, validating)
-- `helpers` - Field helper functions
+### Conditional Visibility
+
+The `visibility` prop accepts:
+
+```tsx
+{
+  operator: 'AND' | 'OR',
+  conditions: [
+    {
+      name: 'fieldName',
+      operator: 'EQUALS' | 'NOT_EQUALS' | 'GREATER_THAN' | 'LESS_THAN' |
+                'GREATER_THAN_OR_EQUAL' | 'LESS_THAN_OR_EQUAL' |
+                'STARTS_WITH' | 'ENDS_WITH' | 'INCLUDES' | 'NOT_INCLUDES',
+      value: any
+    }
+  ]
+}
+```
+
+**Example:**
+
+```tsx
+<SuprForm.Control
+  name='promoCode'
+  visibility={{
+    operator: 'OR',
+    conditions: [
+      { name: 'isVip', operator: 'EQUALS', value: true },
+      { name: 'orderTotal', operator: 'GREATER_THAN', value: 100 },
+    ],
+  }}
+>
+  <input />
+</SuprForm.Control>
+```
+
+### Form Ref Methods
+
+When you pass a `ref` to `<SuprForm>`, you get access to:
+
+```tsx
+formRef.current.setValue(name, value)      // Set field value
+formRef.current.setError(name, error)      // Set field error
+formRef.current.clearErrors(name?)         // Clear errors
+formRef.current.getValues(name?)           // Get field value(s)
+formRef.current.reset(values?)             // Reset form
+formRef.current.setFocus(name)             // Focus field
+formRef.current.resetField(name)           // Reset specific field
+formRef.current.trigger(name?)             // Trigger validation
+formRef.current.unregister(name)           // Unregister field
+formRef.current.watch(name?)               // Watch field value(s)
+```
+
+---
+
+---
+
+## Styling
+
+SuprForm is **design system agnostic**. Style using CSS classes:
+
+```css
+.controlled-field {
+  /* Field wrapper */
+}
+.controlled-field-label {
+  /* Label element */
+}
+.controlled-field-error {
+  /* Error message (defaults: red, 14px, margin-top 4px) */
+}
+```
+
+**Tailwind Example:**
+
+```tsx
+<SuprForm.Control name='email' className='mb-4'>
+  <input className='w-full px-4 py-2 border rounded-lg focus:ring-2' />
+</SuprForm.Control>
+```
+
+**styled-components Example:**
+
+```tsx
+const StyledField = styled.div`
+  .controlled-field-label {
+    font-weight: 600;
+  }
+  .controlled-field-error {
+    color: #d32f2f;
+  }
+`;
+
+<SuprForm.Control className={StyledField} name='email'>
+  <input />
+</SuprForm.Control>;
+```
+
+---
+
+## Publishing
+
+```bash
+npm login
+npm run build
+npm version patch   # or minor/major
+npm publish --access public --otp=XXXXXX
+```
+
+The published package contains only compiled `dist/` files (ESM/CJS + TypeScript declarations).
+
+---
 
 ## License
 
@@ -360,4 +496,4 @@ MIT
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions welcome! Submit a Pull Request on [GitHub](https://github.com/Albinbritto/suprform).
