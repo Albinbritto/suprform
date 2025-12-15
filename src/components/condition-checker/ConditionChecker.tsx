@@ -1,14 +1,11 @@
 import { useMemo } from 'react';
-import { FieldPath, FieldValues, useFormContext, useWatch } from 'react-hook-form';
-import { ConditionCheckProps, ConditionDataType } from '../../type';
+import { FieldValues, useFormContext, useWatch } from 'react-hook-form';
+import { ConditionCheckProps } from '../../type';
 
-export const ConditionChecker = <
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
->({
+export const ConditionChecker = <TFieldValues extends FieldValues = FieldValues>({
   children,
   visibility,
-}: ConditionCheckProps<TFieldValues, TName>) => {
+}: ConditionCheckProps<TFieldValues>) => {
   const { getValues } = useFormContext<TFieldValues>();
 
   const namesToWatch = useMemo(() => {
@@ -25,13 +22,13 @@ export const ConditionChecker = <
 
     const { conditions, operator } = visibility;
 
-    const valueByName: Record<TName, ConditionDataType> = namesToWatch.reduce((acc, name, idx) => {
-      acc[name] = watchedValues[idx];
+    const valueByName: Record<string, any> = namesToWatch.reduce((acc, name, idx) => {
+      acc[name as string] = watchedValues[idx];
       return acc;
-    }, {} as Record<TName, ConditionDataType>);
+    }, {} as Record<string, any>);
 
     const results = conditions.map((condition) => {
-      const fieldValue = valueByName[condition.name];
+      const fieldValue = valueByName[condition.name as string];
 
       switch (condition.operator) {
         case 'EQUALS':
@@ -39,9 +36,21 @@ export const ConditionChecker = <
         case 'NOT_EQUALS':
           return fieldValue !== condition.value;
         case 'GREATER_THAN':
-          return Number(fieldValue) > Number(condition.value);
+          return fieldValue > condition.value;
         case 'LESS_THAN':
-          return Number(fieldValue) < Number(condition.value);
+          return fieldValue < condition.value;
+        case 'GREATER_THAN_OR_EQUAL':
+          return fieldValue >= condition.value;
+        case 'LESS_THAN_OR_EQUAL':
+          return fieldValue <= condition.value;
+        case 'STARTS_WITH':
+          return fieldValue.startsWith(condition.value);
+        case 'ENDS_WITH':
+          return fieldValue.endsWith(condition.value);
+        case 'INCLUDES':
+          return fieldValue.includes(condition.value);
+        case 'NOT_INCLUDES':
+          return !fieldValue.includes(condition.value);
         default:
           return false;
       }

@@ -8,6 +8,7 @@ import {
   SubmitHandler,
   UseFormProps,
   SubmitErrorHandler,
+  PathValue,
 } from 'react-hook-form';
 
 type SuprFormBase = <TFieldValues extends FieldValues = FieldValues>(
@@ -46,19 +47,46 @@ export interface FormControlProps<
   id?: string;
   shouldUnregister?: boolean;
   disabled?: boolean;
-  visibility?: boolean | Visibility<TFieldValues, TName>;
+  visibility?: boolean | Visibility<TFieldValues>;
 }
 
-export interface Visibility<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
-> {
+type StringOperators =
+  | 'EQUALS'
+  | 'NOT_EQUALS'
+  | 'STARTS_WITH'
+  | 'ENDS_WITH'
+  | 'INCLUDES'
+  | 'NOT_INCLUDES';
+
+type NumberOperators =
+  | 'EQUALS'
+  | 'NOT_EQUALS'
+  | 'GREATER_THAN'
+  | 'LESS_THAN'
+  | 'GREATER_THAN_OR_EQUAL'
+  | 'LESS_THAN_OR_EQUAL';
+
+type OperatorForType<T> = T extends string
+  ? StringOperators
+  : T extends number
+  ? NumberOperators
+  : never;
+
+type ValueForType<T> = T extends string ? string : T extends number ? number : never;
+
+type Condition<TFieldValues extends FieldValues, TFieldName extends FieldPath<TFieldValues>> = {
+  name: TFieldName;
+  value: ValueForType<PathValue<TFieldValues, TFieldName>>;
+  operator: OperatorForType<PathValue<TFieldValues, TFieldName>>;
+};
+
+type AnyCondition<TFieldValues extends FieldValues> = {
+  [K in FieldPath<TFieldValues>]: Condition<TFieldValues, K>;
+}[FieldPath<TFieldValues>];
+
+export interface Visibility<TFieldValues extends FieldValues = FieldValues> {
   operator: 'AND' | 'OR';
-  conditions: Array<{
-    name: TName;
-    value: ConditionDataType;
-    operator: 'EQUALS' | 'NOT_EQUALS' | 'GREATER_THAN' | 'LESS_THAN';
-  }>;
+  conditions: Array<AnyCondition<TFieldValues>>;
 }
 
 export interface ControlledFieldProps<
@@ -72,15 +100,12 @@ export interface ControlledFieldProps<
   label?: string;
   id?: string;
   required?: boolean;
-  visibility?: boolean | Visibility<TFieldValues, TName>;
+  visibility?: boolean | Visibility<TFieldValues>;
 }
 
-export interface ConditionCheckProps<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
-> {
+export interface ConditionCheckProps<TFieldValues extends FieldValues = FieldValues> {
   children: React.ReactNode;
-  visibility?: boolean | Visibility<TFieldValues, TName>;
+  visibility?: Visibility<TFieldValues>;
 }
 
 export type ConditionDataType = string | number;
