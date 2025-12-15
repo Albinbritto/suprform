@@ -105,7 +105,7 @@ export interface ControlledFieldProps<
 
 export interface ConditionCheckProps<TFieldValues extends FieldValues = FieldValues> {
   children: React.ReactNode;
-  visibility?: Visibility<TFieldValues>;
+  visibility?: boolean | Visibility<TFieldValues>;
 }
 
 export type ConditionDataType = string | number;

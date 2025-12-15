@@ -70,9 +70,7 @@ export const ControlledField = <
   );
 
   return visibility ? (
-    <ConditionChecker<TFieldValues, TName> visibility={visibility}>
-      {renderField()}
-    </ConditionChecker>
+    <ConditionChecker<TFieldValues> visibility={visibility}>{renderField()}</ConditionChecker>
   ) : (
     renderField()
   );
