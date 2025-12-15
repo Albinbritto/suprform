@@ -1,5 +1,4 @@
 import { useImperativeHandle } from 'react';
-import type { ReactElement } from 'react';
 import {
   Controller,
   FormProvider,
@@ -8,22 +7,9 @@ import {
   FieldValues,
   FieldPath,
 } from 'react-hook-form';
-import { SuprFormProps, FormControlProps } from './type';
 import { SuprFormProvider } from '../../context/SuprFormContext';
-import { ControlledField } from '../controlled-field/ControlledField';
-
-type SuprFormBase = <TFieldValues extends FieldValues = FieldValues>(
-  props: SuprFormProps<TFieldValues>
-) => ReactElement;
-
-type SuprFormComponent = SuprFormBase & {
-  Control: <
-    TFieldValues extends FieldValues = FieldValues,
-    TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
-  >(
-    props: FormControlProps<TFieldValues, TName>
-  ) => ReactElement;
-};
+import { ControlledField } from '../controlled-field';
+import { SuprFormProps, FormControlProps, SuprFormComponent } from '../../type';
 
 const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldValues>({
   children,
@@ -89,6 +75,7 @@ const FormControl = <
   id,
   disabled,
   shouldUnregister,
+  visibility,
 }: FormControlProps<TFieldValues, TName>) => {
   const { control } = useFormContext<TFieldValues>();
   const controlledValue = children.props.value;
@@ -108,6 +95,7 @@ const FormControl = <
           label={label}
           id={id}
           required={!!rules}
+          visibility={visibility}
         />
       )}
     />

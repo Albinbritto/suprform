@@ -1,7 +1,8 @@
 import { useCallback, cloneElement } from 'react';
 import { FieldValues, FieldPath } from 'react-hook-form';
 import { useSuprFormContext } from '../../context/SuprFormContext';
-import { ControlledFieldProps } from '../form/type';
+import { ConditionChecker } from '../condition-checker';
+import { ControlledFieldProps } from '../../type';
 
 export const ControlledField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -14,10 +15,12 @@ export const ControlledField = <
   label,
   id = crypto.randomUUID(),
   required,
+  visibility,
 }: ControlledFieldProps<TFieldValues, TName>) => {
   const { showAsterisk } = useSuprFormContext();
   const { onChange, onBlur, value, name, disabled, ref } = field;
   const { error } = fieldState;
+
   const originalOnChange = children.props.onChange;
   const originalOnBlur = children.props.onBlur;
 
@@ -37,7 +40,7 @@ export const ControlledField = <
     [onBlur, originalOnBlur]
   );
 
-  return (
+  const renderField = () => (
     <div
       className={`controlled-field ${className}`}
       style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
@@ -64,5 +67,13 @@ export const ControlledField = <
         </div>
       )}
     </div>
+  );
+
+  return visibility ? (
+    <ConditionChecker<TFieldValues, TName> visibility={visibility}>
+      {renderField()}
+    </ConditionChecker>
+  ) : (
+    renderField()
   );
 };
