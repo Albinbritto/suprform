@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { FieldValues, useFormContext, useWatch } from 'react-hook-form';
-import { ConditionCheckProps } from '../../type';
+import { ConditionCheckProps } from '../type';
 
 export const ConditionChecker = <TFieldValues extends FieldValues = FieldValues>({
   children,

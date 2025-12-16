@@ -9,6 +9,7 @@ import {
   UseFormProps,
   SubmitErrorHandler,
   PathValue,
+  UseFieldArrayProps,
 } from 'react-hook-form';
 
 type SuprFormBase = <TFieldValues extends FieldValues = FieldValues>(
@@ -22,6 +23,7 @@ export type SuprFormComponent = SuprFormBase & {
   >(
     props: FormControlProps<TFieldValues, TName>
   ) => ReactElement;
+  ControlArray: (props: FormControlArrayProps) => ReactElement;
 };
 
 export interface SuprFormProps<TFieldValues extends FieldValues = FieldValues> {
@@ -48,6 +50,12 @@ export interface FormControlProps<
   shouldUnregister?: boolean;
   disabled?: boolean;
   visibility?: boolean | Visibility<TFieldValues>;
+}
+
+export interface FormControlArrayProps extends Omit<UseFieldArrayProps, 'control'> {
+  ref?: React.Ref<any>;
+  className?: string;
+  children: ReactNode;
 }
 
 type StringOperators =
