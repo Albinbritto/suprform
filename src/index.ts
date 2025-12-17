@@ -1,1 +1,1 @@
-export * from './components/SuprForm';
+export { SuprForm } from './components';
