@@ -87,7 +87,7 @@ const FormControl = <
 
   const fieldId = useMemo(() => id || crypto.randomUUID(), []);
 
-  return (
+  const controllerElement = (
     <Controller
       control={control}
       name={name}
@@ -96,7 +96,7 @@ const FormControl = <
       disabled={disabled}
       shouldUnregister={shouldUnregister}
       render={({ field: { name, onBlur, value, onChange, ref }, fieldState: { error } }) => {
-        const Field = (
+        return (
           <div
             className={`controlled-field ${className}`}
             style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
@@ -130,13 +130,14 @@ const FormControl = <
             )}
           </div>
         );
-        return visibility ? (
-          <ConditionChecker<TFieldValues> visibility={visibility}>{Field}</ConditionChecker>
-        ) : (
-          <>{Field}</>
-        );
       }}
     />
+  );
+
+  return visibility ? (
+    <ConditionChecker<TFieldValues> visibility={visibility}>{controllerElement}</ConditionChecker>
+  ) : (
+    controllerElement
   );
 };
 
