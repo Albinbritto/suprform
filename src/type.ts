@@ -12,6 +12,7 @@ import {
   UseFieldArrayProps,
   UseFormReturn,
   UseFieldArrayReturn,
+  DeepPartial,
 } from 'react-hook-form';
 
 export type SuprFormRef<TFieldValues extends FieldValues = FieldValues> = Pick<
@@ -55,6 +56,7 @@ export interface SuprFormProps<TFieldValues extends FieldValues = FieldValues> {
   onError?: SubmitErrorHandler<TFieldValues>;
   showAsterisk?: boolean;
   ref?: React.Ref<SuprFormRef<TFieldValues>>;
+  onChange?: (values: DeepPartial<TFieldValues>) => void;
 }
 
 export interface FormControlProps<

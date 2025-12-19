@@ -1,4 +1,11 @@
-import { useImperativeHandle, Children, cloneElement, isValidElement, useMemo } from 'react';
+import {
+  useImperativeHandle,
+  Children,
+  cloneElement,
+  isValidElement,
+  useMemo,
+  useEffect,
+} from 'react';
 import {
   Controller,
   FormProvider,
@@ -21,6 +28,7 @@ const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldVal
   formOptions,
   showAsterisk,
   ref,
+  onChange,
 }: SuprFormProps<TFieldValues>) => {
   const methods = useForm<TFieldValues>({
     mode: 'onSubmit',
@@ -48,6 +56,13 @@ const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldVal
     },
     [methods]
   );
+
+  useEffect(() => {
+    const subscription = methods.watch((value) => {
+      onChange?.(value);
+    });
+    return () => subscription.unsubscribe();
+  }, [methods.watch]);
 
   return (
     <SuprFormProvider showAsterisk={showAsterisk}>
@@ -192,7 +207,16 @@ const FormControlArray = ({ name, rules, ref, children }: FormControlArrayProps)
     <>
       {methods.fields.map((_, index) => {
         const prefix = `${name}.${index}.`;
-        return prefixChildrenNames(children, prefix);
+        return (
+          <div
+            data-index={index}
+            key={prefix}
+            style={{ display: 'contents' }}
+            id='field-array-item'
+          >
+            {prefixChildrenNames(children, prefix)}
+          </div>
+        );
       })}
     </>
   );
