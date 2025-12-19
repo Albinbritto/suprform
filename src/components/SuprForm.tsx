@@ -43,6 +43,7 @@ const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldVal
         trigger: methods.trigger,
         unregister: methods.unregister,
         watch: methods.watch,
+        handleSubmit: methods.handleSubmit,
       };
     },
     [methods]
@@ -71,7 +72,7 @@ const FormControl = <
   children,
   name,
   rules,
-  className,
+  className = '',
   label,
   id,
   disabled,
@@ -79,7 +80,7 @@ const FormControl = <
   visibility,
 }: FormControlProps<TFieldValues, TName>) => {
   const { control } = useFormContext<TFieldValues>();
-  const controlledValue = children.props.value;
+  const controlledValue = children.props.value ?? '';
   const { showAsterisk } = useSuprFormContext();
 
   const originalOnChange = children.props.onChange;

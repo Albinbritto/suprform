@@ -10,7 +10,27 @@ import {
   SubmitErrorHandler,
   PathValue,
   UseFieldArrayProps,
+  UseFormReturn,
+  UseFieldArrayReturn,
 } from 'react-hook-form';
+
+export type SuprFormRef<TFieldValues extends FieldValues = FieldValues> = Pick<
+  UseFormReturn<TFieldValues>,
+  | 'setValue'
+  | 'setError'
+  | 'clearErrors'
+  | 'getValues'
+  | 'reset'
+  | 'setFocus'
+  | 'resetField'
+  | 'trigger'
+  | 'unregister'
+  | 'watch'
+  | 'handleSubmit'
+>;
+
+export type FormControlArrayRef<TFieldValues extends FieldValues = FieldValues> =
+  UseFieldArrayReturn<TFieldValues>;
 
 type SuprFormBase = <TFieldValues extends FieldValues = FieldValues>(
   props: SuprFormProps<TFieldValues>
@@ -34,7 +54,7 @@ export interface SuprFormProps<TFieldValues extends FieldValues = FieldValues> {
   formOptions?: UseFormProps<TFieldValues>;
   onError?: SubmitErrorHandler<TFieldValues>;
   showAsterisk?: boolean;
-  ref?: React.Ref<any>;
+  ref?: React.Ref<SuprFormRef<TFieldValues>>;
 }
 
 export interface FormControlProps<
@@ -52,8 +72,9 @@ export interface FormControlProps<
   visibility?: boolean | Visibility<TFieldValues>;
 }
 
-export interface FormControlArrayProps extends Omit<UseFieldArrayProps, 'control'> {
-  ref?: React.Ref<any>;
+export interface FormControlArrayProps<TFieldValues extends FieldValues = FieldValues>
+  extends Omit<UseFieldArrayProps, 'control'> {
+  ref?: React.Ref<FormControlArrayRef<TFieldValues>>;
   className?: string;
   children: ReactNode;
 }
