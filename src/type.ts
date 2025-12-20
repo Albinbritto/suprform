@@ -13,6 +13,7 @@ import {
   UseFormReturn,
   UseFieldArrayReturn,
   DeepPartial,
+  ArrayPath,
 } from 'react-hook-form';
 
 export type SuprFormRef<TFieldValues extends FieldValues = FieldValues> = Pick<
@@ -30,8 +31,10 @@ export type SuprFormRef<TFieldValues extends FieldValues = FieldValues> = Pick<
   | 'handleSubmit'
 >;
 
-export type FormControlArrayRef<TFieldValues extends FieldValues = FieldValues> =
-  UseFieldArrayReturn<TFieldValues>;
+export type FormControlArrayRef<
+  TFieldValues extends FieldValues = FieldValues,
+  TArrayName extends ArrayPath<TFieldValues> = ArrayPath<TFieldValues>
+> = UseFieldArrayReturn<TFieldValues, TArrayName>;
 
 type SuprFormBase = <TFieldValues extends FieldValues = FieldValues>(
   props: SuprFormProps<TFieldValues>
@@ -44,7 +47,12 @@ export type SuprFormComponent = SuprFormBase & {
   >(
     props: FormControlProps<TFieldValues, TName>
   ) => ReactElement;
-  ControlArray: (props: FormControlArrayProps) => ReactElement;
+  ControlArray: <
+    TFieldValues extends FieldValues = FieldValues,
+    TArrayName extends ArrayPath<TFieldValues> = ArrayPath<TFieldValues>
+  >(
+    props: FormControlArrayProps<TFieldValues, TArrayName>
+  ) => ReactElement;
 };
 
 export interface SuprFormProps<TFieldValues extends FieldValues = FieldValues> {
@@ -74,11 +82,14 @@ export interface FormControlProps<
   visibility?: boolean | Visibility<TFieldValues>;
 }
 
-export interface FormControlArrayProps<TFieldValues extends FieldValues = FieldValues>
-  extends Omit<UseFieldArrayProps, 'control'> {
-  ref?: React.Ref<FormControlArrayRef<TFieldValues>>;
+export interface FormControlArrayProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TArrayName extends ArrayPath<TFieldValues> = ArrayPath<TFieldValues>
+> extends Omit<UseFieldArrayProps<TFieldValues, TArrayName>, 'control'> {
+  ref?: React.Ref<FormControlArrayRef<TFieldValues, TArrayName>>;
   className?: string;
   children: ReactNode;
+  visibility?: ControlArrayVisibilityMap<TFieldValues, TArrayName>;
 }
 
 type StringOperators =
@@ -97,18 +108,28 @@ type NumberOperators =
   | 'GREATER_THAN_OR_EQUAL'
   | 'LESS_THAN_OR_EQUAL';
 
+type BooleanOperators = 'EQUALS' | 'NOT_EQUALS';
+
 type OperatorForType<T> = T extends string
   ? StringOperators
   : T extends number
   ? NumberOperators
+  : T extends boolean
+  ? BooleanOperators
   : never;
 
-type ValueForType<T> = T extends string ? string : T extends number ? number : never;
+type ValueForType<T> = T extends string
+  ? string
+  : T extends number
+  ? number
+  : T extends boolean
+  ? boolean
+  : never;
 
 type Condition<TFieldValues extends FieldValues, TFieldName extends FieldPath<TFieldValues>> = {
   name: TFieldName;
-  value: ValueForType<PathValue<TFieldValues, TFieldName>>;
-  operator: OperatorForType<PathValue<TFieldValues, TFieldName>>;
+  value: ValueForType<NonNullable<PathValue<TFieldValues, TFieldName>>>;
+  operator: OperatorForType<NonNullable<PathValue<TFieldValues, TFieldName>>>;
 };
 
 type AnyCondition<TFieldValues extends FieldValues> = {
@@ -119,6 +140,27 @@ export interface Visibility<TFieldValues extends FieldValues = FieldValues> {
   operator: 'AND' | 'OR';
   conditions: Array<AnyCondition<TFieldValues>>;
 }
+
+type FieldArrayItem<T> = T extends ReadonlyArray<infer U> ? U : never;
+
+type FieldArrayItemFromValues<
+  TFieldValues extends FieldValues,
+  TArrayName extends ArrayPath<TFieldValues>
+> = FieldArrayItem<
+  PathValue<TFieldValues, TArrayName & FieldPath<TFieldValues>>
+> extends FieldValues
+  ? FieldArrayItem<PathValue<TFieldValues, TArrayName & FieldPath<TFieldValues>>>
+  : FieldValues;
+
+export type ControlArrayVisibilityMap<
+  TFieldValues extends FieldValues,
+  TArrayName extends ArrayPath<TFieldValues>
+> = Partial<
+  Record<
+    FieldPath<FieldArrayItemFromValues<TFieldValues, TArrayName>>,
+    Visibility<FieldArrayItemFromValues<TFieldValues, TArrayName>>
+  >
+>;
 
 export interface ControlledFieldProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -139,4 +181,4 @@ export interface ConditionCheckProps<TFieldValues extends FieldValues = FieldVal
   visibility?: boolean | Visibility<TFieldValues>;
 }
 
-export type ConditionDataType = string | number;
+export type ConditionDataType = string | number | boolean;

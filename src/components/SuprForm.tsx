@@ -14,6 +14,7 @@ import {
   FieldValues,
   FieldPath,
   useFieldArray,
+  ArrayPath,
 } from 'react-hook-form';
 import { SuprFormProvider, useSuprFormContext } from '../context/SuprFormContext';
 import { SuprFormProps, FormControlProps, SuprFormComponent, FormControlArrayProps } from '../type';
@@ -157,8 +158,17 @@ const FormControl = <
   );
 };
 
-const FormControlArray = ({ name, rules, ref, children }: FormControlArrayProps) => {
-  const methods = useFieldArray({
+const FormControlArray = <
+  TFieldValues extends FieldValues = FieldValues,
+  TArrayName extends ArrayPath<TFieldValues> = ArrayPath<TFieldValues>
+>({
+  name,
+  rules,
+  ref,
+  children,
+  visibility,
+}: FormControlArrayProps<TFieldValues, TArrayName>) => {
+  const methods = useFieldArray<TFieldValues, TArrayName>({
     name,
     rules,
   });
@@ -180,9 +190,24 @@ const FormControlArray = ({ name, rules, ref, children }: FormControlArrayProps)
         (childProps.name !== undefined && typeof childType !== 'string');
 
       if (isSuprFormControl && childProps.name !== undefined) {
+        const _visibility = visibility
+          ? visibility[childProps.name as keyof typeof visibility]
+          : undefined;
+        const fieldVisibility = _visibility
+          ? {
+              ..._visibility,
+              conditions:
+                _visibility.conditions?.map((cond: any) => ({
+                  ...cond,
+                  name: `${prefix}${cond.name}`,
+                })) || [],
+            }
+          : undefined;
+
         const clonedProps: any = {
           ...childProps,
           name: `${prefix}${childProps.name}`,
+          visibility: fieldVisibility,
         };
 
         if (childProps.id !== undefined) {
