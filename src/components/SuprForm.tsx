@@ -19,6 +19,7 @@ import {
 import { SuprFormProvider, useSuprFormContext } from '../context/SuprFormContext';
 import { SuprFormProps, FormControlProps, SuprFormComponent, FormControlArrayProps } from '../type';
 import { ConditionChecker } from './ConditionChecker';
+import { DisabilityChecker } from './DisabilityChecker';
 
 const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldValues>({
   children,
@@ -104,57 +105,57 @@ const FormControl = <
 
   const fieldId = useMemo(() => id || crypto.randomUUID(), []);
 
-  const controllerElement = (
-    <Controller
-      control={control}
-      name={name}
-      rules={rules}
-      defaultValue={controlledValue}
-      disabled={disabled}
-      shouldUnregister={shouldUnregister}
-      render={({ field: { name, onBlur, value, onChange, ref }, fieldState: { error } }) => {
-        return (
-          <div
-            className={`controlled-field ${className}`}
-            style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
-          >
-            {label && (
-              <label htmlFor={fieldId} className='controlled-field-label'>
-                {label}
-                {showAsterisk && !!rules && <span style={{ color: 'red' }}> *</span>}
-              </label>
-            )}
-            {cloneElement(children, {
-              ...children.props,
-              id: fieldId,
-              name,
-              disabled,
-              onChange: (...args: any[]) => {
-                onChange(...args);
-                originalOnChange?.(...args);
-              },
-              value: value,
-              onBlur: (...args: any[]) => {
-                onBlur();
-                originalOnBlur?.(...args);
-              },
-              ref,
-            })}
-            {error && (
-              <div style={{ color: 'red', fontSize: 13 }} className='controlled-field-error'>
-                {error.message}
+  return (
+    <ConditionChecker<TFieldValues> visibility={visibility}>
+      <DisabilityChecker disabled={disabled}>
+        <Controller
+          control={control}
+          name={name}
+          rules={rules}
+          defaultValue={controlledValue}
+          shouldUnregister={shouldUnregister}
+          render={({
+            field: { name, onBlur, value, onChange, ref, disabled: fieldDisabled },
+            fieldState: { error },
+          }) => {
+            return (
+              <div
+                className={`controlled-field ${className}`}
+                style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
+              >
+                {label && (
+                  <label htmlFor={fieldId} className='controlled-field-label'>
+                    {label}
+                    {showAsterisk && !!rules && <span style={{ color: 'red' }}> *</span>}
+                  </label>
+                )}
+                {cloneElement(children, {
+                  ...children.props,
+                  id: fieldId,
+                  name,
+                  disabled: fieldDisabled,
+                  onChange: (...args: any[]) => {
+                    onChange(...args);
+                    originalOnChange?.(...args);
+                  },
+                  value: value,
+                  onBlur: (...args: any[]) => {
+                    onBlur();
+                    originalOnBlur?.(...args);
+                  },
+                  ref,
+                })}
+                {error && (
+                  <div style={{ color: 'red', fontSize: 13 }} className='controlled-field-error'>
+                    {error.message}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        );
-      }}
-    />
-  );
-
-  return visibility ? (
-    <ConditionChecker<TFieldValues> visibility={visibility}>{controllerElement}</ConditionChecker>
-  ) : (
-    controllerElement
+            );
+          }}
+        />
+      </DisabilityChecker>
+    </ConditionChecker>
   );
 };
 
@@ -167,6 +168,7 @@ const FormControlArray = <
   ref,
   children,
   visibility,
+  disabled,
 }: FormControlArrayProps<TFieldValues, TArrayName>) => {
   const methods = useFieldArray<TFieldValues, TArrayName>({
     name,
@@ -190,6 +192,7 @@ const FormControlArray = <
         (childProps.name !== undefined && typeof childType !== 'string');
 
       if (isSuprFormControl && childProps.name !== undefined) {
+        //visibility handling
         const _visibility = visibility
           ? visibility[childProps.name as keyof typeof visibility]
           : undefined;
@@ -204,10 +207,27 @@ const FormControlArray = <
             }
           : undefined;
 
+        //disability handling
+        const _disability = disabled
+          ? disabled[childProps.name as keyof typeof disabled]
+          : undefined;
+
+        const fieldDisabled = _disability
+          ? {
+              ..._disability,
+              conditions:
+                _disability.conditions?.map((cond: any) => ({
+                  ...cond,
+                  name: `${prefix}${cond.name}`,
+                })) || [],
+            }
+          : undefined;
+
         const clonedProps: any = {
           ...childProps,
           name: `${prefix}${childProps.name}`,
           visibility: fieldVisibility,
+          disabled: fieldDisabled,
         };
 
         if (childProps.id !== undefined) {

@@ -78,7 +78,7 @@ export interface FormControlProps<
   className?: string;
   id?: string;
   shouldUnregister?: boolean;
-  disabled?: boolean;
+  disabled?: boolean | Visibility<TFieldValues>;
   visibility?: boolean | Visibility<TFieldValues>;
 }
 
@@ -90,6 +90,7 @@ export interface FormControlArrayProps<
   className?: string;
   children: ReactNode;
   visibility?: ControlArrayVisibilityMap<TFieldValues, TArrayName>;
+  disabled?: ControlArrayVisibilityMap<TFieldValues, TArrayName>;
 }
 
 type StringOperators =
@@ -179,6 +180,11 @@ export interface ControlledFieldProps<
 export interface ConditionCheckProps<TFieldValues extends FieldValues = FieldValues> {
   children: React.ReactNode;
   visibility?: boolean | Visibility<TFieldValues>;
+}
+
+export interface DisableCheckProps<TFieldValues extends FieldValues = FieldValues> {
+  children: ReactElement<any>;
+  disabled?: boolean | Visibility<TFieldValues>;
 }
 
 export type ConditionDataType = string | number | boolean;
