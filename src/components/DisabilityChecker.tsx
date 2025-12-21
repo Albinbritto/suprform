@@ -22,7 +22,5 @@ export const DisabilityChecker = <TFieldValues extends FieldValues = FieldValues
     return conditionEvaluator<TFieldValues>(namesToWatch, watchedValues, disabled);
   }, [disabled, namesToWatch, watchedValues]);
 
-  console.log('DisabilityChecker - isDisabled:', isDisabled, 'namesToWatch:', namesToWatch);
-
   return cloneElement(children, { ...children.props, disabled: isDisabled });
 };

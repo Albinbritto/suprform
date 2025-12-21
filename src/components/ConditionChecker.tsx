@@ -22,12 +22,5 @@ export const ConditionChecker = <TFieldValues extends FieldValues = FieldValues>
     return conditionEvaluator<TFieldValues>(namesToWatch, watchedValues, visibility);
   }, [visibility, namesToWatch, watchedValues]);
 
-  console.log(
-    'ConditionChecker - evaluateCondition:',
-    evaluateCondition,
-    'namesToWatch:',
-    namesToWatch
-  );
-
   return evaluateCondition ? children : null;
 };
