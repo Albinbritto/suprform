@@ -41,7 +41,5 @@ export function conditionEvaluator<TFieldValues extends FieldValues>(
     }
   });
 
-  console.log('Condition results:', results, 'Operator:', operator);
-
   return operator === 'AND' ? results.every(Boolean) : results.some(Boolean);
 }
