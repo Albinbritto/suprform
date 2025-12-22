@@ -7,6 +7,7 @@ export function conditionEvaluator<TFieldValues extends FieldValues>(
   condition: Visibility<TFieldValues>
 ): boolean {
   const { conditions, operator } = condition;
+
   const valueByName: Record<string, any> = namesToWatch.reduce((acc, name, idx) => {
     acc[name as string] = watchedValues[idx];
     return acc;
