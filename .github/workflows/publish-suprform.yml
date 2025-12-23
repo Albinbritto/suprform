@@ -1,0 +1,62 @@
+name: Publish suprform to npm
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/suprform/**'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+concurrency:
+  group: npm-publish-suprform
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: true
+
+      - name: Detect version change
+        id: versions
+        run: |
+          set -e
+          git fetch --depth=2 || true
+          git show HEAD^:packages/suprform/package.json > prev.json || echo '{"version":"none"}' > prev.json
+          echo "prev=$(node -p \"require('./prev.json').version\")" >> $GITHUB_OUTPUT
+          echo "curr=$(node -p \"require('./packages/suprform/package.json').version\")" >> $GITHUB_OUTPUT
+
+      - name: Show versions
+        run: echo "prev=${{ steps.versions.outputs.prev }} curr=${{ steps.versions.outputs.curr }}"
+
+      - name: Build library
+        if: ${{ steps.versions.outputs.prev != steps.versions.outputs.curr }}
+        run: pnpm -C packages/suprform build
+
+      - name: Publish to npm (Trusted Publishing)
+        if: ${{ steps.versions.outputs.prev != steps.versions.outputs.curr }}
+        run: |
+          cd packages/suprform
+          npm publish --access public --provenance
+
+      - name: Skip publishing (no version bump)
+        if: ${{ steps.versions.outputs.prev == steps.versions.outputs.curr }}
+        run: echo "No version change detected; skipping publish."

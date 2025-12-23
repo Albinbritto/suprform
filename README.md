@@ -1,6 +1,43 @@
-# SuprForm
+# SuprForm Monorepo
 
-A **headless React form library** that wraps [react-hook-form](https://react-hook-form.com) with a composable API for effortless form management. Design system agnostic, TypeScript-first, and built for developer experience.
+This repo is now a monorepo with two packages:
+
+- packages/suprform — the publishable headless React form library
+- packages/site — a Next.js site to market the library with examples
+
+Use npm workspaces to develop both packages together.
+
+## Quick commands
+
+- Install dependencies (from repo root):
+
+```bash
+npm install
+```
+
+- Build all workspaces:
+
+```bash
+npm run build
+```
+
+- Develop the site:
+
+```bash
+npm run dev:site
+```
+
+## Publishing the library
+
+The library lives in packages/suprform and remains publish-ready. From repo root:
+
+```bash
+cd packages/suprform
+npm version [patch|minor|major]
+npm publish --access public
+```
+
+Ensure you are logged in to npm and have 2FA OTP ready if enabled.
 
 ## Core Features
 
