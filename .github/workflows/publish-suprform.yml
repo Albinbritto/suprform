@@ -35,28 +35,10 @@ jobs:
           version: 8
           run_install: true
 
-      - name: Detect version change
-        id: versions
-        run: |
-          set -e
-          git fetch --depth=2 || true
-          git show HEAD^:packages/suprform/package.json > prev.json || echo '{"version":"none"}' > prev.json
-          echo "prev=$(node -p \"require('./prev.json').version\")" >> $GITHUB_OUTPUT
-          echo "curr=$(node -p \"require('./packages/suprform/package.json').version\")" >> $GITHUB_OUTPUT
-
-      - name: Show versions
-        run: echo "prev=${{ steps.versions.outputs.prev }} curr=${{ steps.versions.outputs.curr }}"
-
       - name: Build library
-        if: ${{ steps.versions.outputs.prev != steps.versions.outputs.curr }}
         run: pnpm -C packages/suprform build
 
       - name: Publish to npm (Trusted Publishing)
-        if: ${{ steps.versions.outputs.prev != steps.versions.outputs.curr }}
         run: |
           cd packages/suprform
           npm publish --access public --provenance
-
-      - name: Skip publishing (no version bump)
-        if: ${{ steps.versions.outputs.prev == steps.versions.outputs.curr }}
-        run: echo "No version change detected; skipping publish."
