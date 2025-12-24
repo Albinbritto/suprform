@@ -18,6 +18,7 @@ export const FormControl = <
   disabled,
   shouldUnregister,
   visibility,
+  description,
 }: FormControlProps<TFieldValues, TName>) => {
   const { control } = useFormContext<TFieldValues>();
   const controlledValue = children.props.value ?? '';
@@ -27,6 +28,16 @@ export const FormControl = <
   const originalOnBlur = children.props.onBlur;
 
   const fieldId = useMemo(() => id || crypto.randomUUID(), []);
+
+  const fieldDescription = useMemo(() => {
+    if (!description) return;
+
+    if (typeof description === 'string') {
+      return { position: 'LABEL_BOTTOM', text: description };
+    }
+
+    return description;
+  }, [description]);
 
   return (
     <ConditionChecker<TFieldValues> visibility={visibility}>
@@ -46,12 +57,28 @@ export const FormControl = <
                 className={`controlled-field ${className}`}
                 style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
               >
-                {label && (
-                  <label htmlFor={fieldId} className='controlled-field-label'>
-                    {label}
-                    {showAsterisk && !!rules && <span style={{ color: 'red' }}> *</span>}
-                  </label>
-                )}
+                <div
+                  className='controlled-field-description'
+                  style={{
+                    display: 'inline-flex',
+                    ...(fieldDescription && {
+                      gap: '2px',
+                      alignItems: 'center',
+                      flexDirection: fieldDescription.position === 'LABEL_RIGHT' ? 'row' : 'column',
+                    }),
+                  }}
+                >
+                  {label && (
+                    <label htmlFor={fieldId} className='controlled-field-label'>
+                      {label}
+                      {showAsterisk && !!rules && <span style={{ color: 'red' }}> *</span>}
+                    </label>
+                  )}
+                  {fieldDescription && fieldDescription.position !== 'CONTROL_BOTTOM' && (
+                    <span style={{ color: '#a1a1a1', fontSize: 12 }}>{fieldDescription.text}</span>
+                  )}
+                </div>
+
                 {cloneElement(children, {
                   ...children.props,
                   id: fieldId,

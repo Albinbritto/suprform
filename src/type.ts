@@ -80,6 +80,7 @@ export interface FormControlProps<
   shouldUnregister?: boolean;
   disabled?: boolean | Visibility<TFieldValues>;
   visibility?: boolean | Visibility<TFieldValues>;
+  description?: string | { text: string; position?: 'LABEL_RIGHT' | 'LABEL_BOTTOM' };
 }
 
 export interface FormControlArrayProps<
