@@ -5,9 +5,7 @@ import {
   ControllerFieldState,
   ControllerRenderProps,
   RegisterOptions,
-  SubmitHandler,
   UseFormProps,
-  SubmitErrorHandler,
   PathValue,
   UseFieldArrayProps,
   UseFormReturn,
@@ -58,11 +56,9 @@ export type SuprFormComponent = SuprFormBase & {
 
 export interface SuprFormProps<TFieldValues extends FieldValues = FieldValues> {
   children: ReactNode;
-  onSubmit?: SubmitHandler<TFieldValues>;
   style?: React.CSSProperties;
   className?: string;
   formOptions?: UseFormProps<TFieldValues>;
-  onError?: SubmitErrorHandler<TFieldValues>;
   showAsterisk?: boolean;
   ref?: React.Ref<SuprFormRef<TFieldValues>>;
   onChange?: (values: DeepPartial<TFieldValues>) => void;

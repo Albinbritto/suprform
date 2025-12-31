@@ -7,8 +7,6 @@ import { FormControlArray } from './FormControlArray';
 
 const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldValues>({
   children,
-  onSubmit = () => {},
-  onError = () => {},
   style = {},
   className = '',
   formOptions,
@@ -41,7 +39,7 @@ const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldVal
         formState: methods.formState,
       };
     },
-    [methods]
+    [JSON.stringify(methods)]
   );
 
   useEffect(() => {
@@ -54,14 +52,9 @@ const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldVal
   return (
     <SuprFormProvider showAsterisk={showAsterisk}>
       <FormProvider {...methods}>
-        <form
-          noValidate
-          onSubmit={methods.handleSubmit(onSubmit, onError)}
-          style={style}
-          className={className}
-        >
+        <div style={style} className={className}>
           {children}
-        </form>
+        </div>
       </FormProvider>
     </SuprFormProvider>
   );

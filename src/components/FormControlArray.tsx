@@ -19,7 +19,7 @@ export const FormControlArray = <
     rules,
   });
 
-  useImperativeHandle(ref, () => methods, [methods]);
+  useImperativeHandle(ref, () => methods, [JSON.stringify(methods)]);
 
   const prefixChildrenNames = (children: React.ReactNode, prefix: string): React.ReactNode => {
     return Children.map(children, (child) => {
