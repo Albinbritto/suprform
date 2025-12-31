@@ -38,6 +38,7 @@ const SuprForm: SuprFormComponent = <TFieldValues extends FieldValues = FieldVal
         unregister: methods.unregister,
         watch: methods.watch,
         handleSubmit: methods.handleSubmit,
+        formState: methods.formState,
       };
     },
     [methods]
