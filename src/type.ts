@@ -29,6 +29,7 @@ export type SuprFormRef<TFieldValues extends FieldValues = FieldValues> = Pick<
   | 'unregister'
   | 'watch'
   | 'handleSubmit'
+  | 'formState'
 >;
 
 export type FormControlArrayRef<
