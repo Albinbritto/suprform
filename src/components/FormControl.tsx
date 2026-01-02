@@ -15,17 +15,16 @@ export const FormControl = <
   className = '',
   label,
   id,
+  value: externalValue,
   disabled,
   shouldUnregister,
   visibility,
   description,
 }: FormControlProps<TFieldValues, TName>) => {
   const { control } = useFormContext<TFieldValues>();
-  const controlledValue = children.props.value ?? '';
+  const isRenderFunction = typeof children === 'function';
+  const controlledValue = isRenderFunction ? externalValue ?? '' : children.props.value ?? '';
   const { showAsterisk } = useSuprFormContext();
-
-  const originalOnChange = children.props.onChange;
-  const originalOnBlur = children.props.onBlur;
 
   const fieldId = useMemo(() => id || crypto.randomUUID(), []);
 
@@ -48,10 +47,11 @@ export const FormControl = <
           rules={rules}
           defaultValue={controlledValue}
           shouldUnregister={shouldUnregister}
-          render={({
-            field: { name, onBlur, value, onChange, ref, disabled: fieldDisabled },
-            fieldState: { error },
-          }) => {
+          render={(fieldState) => {
+            const {
+              field: { name, onBlur, value, onChange, ref, disabled: fieldDisabled },
+              fieldState: { error },
+            } = fieldState;
             return (
               <div
                 className={`controlled-field ${className}`}
@@ -79,22 +79,24 @@ export const FormControl = <
                   )}
                 </div>
 
-                {cloneElement(children, {
-                  ...children.props,
-                  id: fieldId,
-                  name,
-                  disabled: fieldDisabled,
-                  onChange: (...args: any[]) => {
-                    onChange(...args);
-                    originalOnChange?.(...args);
-                  },
-                  value: value,
-                  onBlur: (...args: any[]) => {
-                    onBlur();
-                    originalOnBlur?.(...args);
-                  },
-                  ref,
-                })}
+                {isRenderFunction
+                  ? children(fieldState)
+                  : cloneElement(children, {
+                      ...children.props,
+                      id: fieldId,
+                      name,
+                      disabled: fieldDisabled,
+                      onChange: (...args: any[]) => {
+                        onChange(...args);
+                        children.props.onChange?.(...args);
+                      },
+                      value: value,
+                      onBlur: (...args: any[]) => {
+                        onBlur();
+                        children.props.onBlur?.(...args);
+                      },
+                      ref,
+                    })}
                 {error && (
                   <div style={{ color: 'red', fontSize: 13 }} className='controlled-field-error'>
                     {error.message}

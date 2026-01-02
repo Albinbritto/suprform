@@ -1,6 +1,6 @@
 {
   "name": "suprform",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A headless React form library for managing complex state, validation, and error handling",
   "type": "module",
   "main": "./dist/suprform.cjs.js",

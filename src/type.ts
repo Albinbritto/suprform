@@ -12,6 +12,7 @@ import {
   UseFieldArrayReturn,
   DeepPartial,
   ArrayPath,
+  UseFormStateReturn,
 } from 'react-hook-form';
 
 export type SuprFormRef<TFieldValues extends FieldValues = FieldValues> = Pick<
@@ -68,12 +69,19 @@ export interface FormControlProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 > {
-  children: ReactElement<any>;
+  children:
+    | ReactElement<any>
+    | ((fieldState: {
+        field: ControllerRenderProps<TFieldValues, TName>;
+        fieldState: ControllerFieldState;
+        formState: UseFormStateReturn<TFieldValues>;
+      }) => ReactElement);
   rules?: RegisterOptions<TFieldValues, TName>;
   name: TName;
   label?: string;
   className?: string;
   id?: string;
+  value?: any;
   shouldUnregister?: boolean;
   disabled?: boolean | Visibility<TFieldValues>;
   visibility?: boolean | Visibility<TFieldValues>;
